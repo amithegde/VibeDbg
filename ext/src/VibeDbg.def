@@ -1,0 +1,15 @@
+LIBRARY "VibeDbg"
+EXPORTS
+    WinDbgExtensionDllInit
+    DebugExtensionInitialize
+    DebugExtensionUninitialize
+    DebugExtensionCanUnload
+    ExtensionApiVersion
+    CheckVersion
+    vibedbg_connect
+    vibedbg_disconnect
+    vibedbg_status
+    vibedbg_execute
+    vibedbg_version
+    vibedbg_help
+    vibedbg_test

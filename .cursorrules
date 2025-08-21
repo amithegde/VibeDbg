@@ -1,0 +1,94 @@
+# VibeDbg - Cursor Development Rules
+
+## Project Context
+This project is a conversational, LLM-powered AI assistant for WinDbg. For complete project overview, architecture, and setup instructions, see [CLAUDE.md](./CLAUDE.md).
+
+## Development Guidelines
+
+### Code Style & Standards
+
+#### C++ (WinDbg Extension)
+- Follow Microsoft C++ coding standards
+- Use consistent naming: camelCase for variables, PascalCase for classes
+- Include comprehensive error handling and logging
+- Add comments for complex WinDbg-specific operations
+- Prefer RAII and smart pointers over raw pointers
+
+#### Python (MCP Server)
+- Follow PEP 8 style guidelines
+- Use type hints for all function parameters and return values
+- Implement comprehensive error handling with custom exceptions
+- Add docstrings for all public functions and classes
+- Use async/await patterns for I/O operations
+
+### File Organization
+- Keep related functionality grouped together
+- Use clear, descriptive file and directory names
+- Maintain separation between extension and MCP server code
+- Follow the existing project structure in `ext/` and `mcp-server/`
+
+### Testing Requirements
+- Write unit tests for all new functionality
+- Test both C++ extension and Python MCP server components
+- Include integration tests for communication between components
+- Test error conditions and edge cases
+
+### Documentation
+- Update relevant documentation when adding new features
+- Include usage examples for new commands or tools
+- Document any changes to the communication protocol
+- Keep build and setup instructions current
+
+### Build & Deployment
+- Always test builds in both Debug and Release configurations
+- Verify extension loads correctly in WinDbg before committing
+- Ensure MCP server dependencies are properly specified in pyproject.toml
+- Test the complete workflow: extension → MCP server → LLM integration
+
+### Communication Protocol
+- Maintain backward compatibility for named pipe communication
+- Document any protocol changes thoroughly
+- Include proper error handling for communication failures
+- Log all communication events for debugging
+
+### Security Considerations
+- Validate all input from external sources
+- Sanitize command output before processing
+- Implement proper access controls for debugging operations
+- Follow Windows security best practices
+
+## Common Tasks
+
+### Adding New WinDbg Commands
+1. Add command handler in `ext/src/core/command_handlers.cpp`
+2. Update command registration in `ext/src/extension_main.cpp`
+3. Add corresponding MCP server tool in `mcp-server/src/tools/`
+4. Update documentation and tests
+
+### Adding New MCP Tools
+1. Create tool in appropriate category under `mcp-server/src/tools/`
+2. Implement proper error handling and logging
+3. Add tool metadata and documentation
+4. Include unit tests for the new tool
+
+### Debugging Issues
+- Check both WinDbg extension logs and MCP server logs
+- Verify named pipe communication is working
+- Test individual components in isolation
+- Use the comprehensive logging system for troubleshooting
+
+## AI Assistant Guidelines
+When working with AI assistance:
+- Provide clear context about the current debugging session
+- Specify the target platform and WinDbg version
+- Include relevant error messages and logs
+- Ask for both implementation and testing approaches
+- Request documentation updates for new features
+
+## Performance Considerations
+- Minimize blocking operations in the extension
+- Use efficient data structures for large debugging sessions
+- Implement proper cleanup for resources
+- Consider memory usage in long-running debugging sessions
+
+Remember: This is a debugging tool - reliability and correctness are paramount over performance optimizations.
