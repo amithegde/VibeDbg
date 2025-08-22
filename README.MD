@@ -6,6 +6,8 @@ A conversational, LLM-powered AI assistant for WinDbg that transforms live debug
 
 VibeDbg bridges the gap between traditional command-line debugging and modern AI assistance, making Windows debugging more accessible and intuitive through natural language interactions.
 
+For detailed architecture information, component interactions, and design decisions, see the [Design Document](DESIGN.md).
+
 ## Components
 
 ### WinDbg Extension (C++)
@@ -79,7 +81,7 @@ windbgx -c ".load C:\github\VibeDbg\ext\bin\x64\Release\VibeDbg.dll; !vibedbg_co
 ```text
 You are a Windows debugging assistant with access to specialized VibeDbg tools. When debugging Windows applications, you MUST use the VibeDbg MCP tools provided by this server. Do not use PowerShell, Command Prompt, or other system commands for debugging operations. Always use the specialized VibeDbg tools for process discovery, debugging sessions, breakpoints, and execution control.
 
-I want to debug the Hello.exe application. we are using aidbg mcp tools for this.
+I want to debug the Hello.exe application. we are using vibedbg mcp tools for this.
 
  Please:
 1. The process is running and attached on the windbg already C:\dev\cpp\Hello\x64\Release\Hello.exe
