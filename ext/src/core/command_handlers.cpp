@@ -112,6 +112,12 @@ Memory Operations:
   search_memory <start> <end> <pattern> - Search memory for pattern
   show_memory_region <addr>    - Show memory region information
 
+Visualization Commands:
+  dx <expression>              - Display debugger object model expression with NatVis
+  dx -g <expression>           - Display as data grid
+  dx -r# <expression>          - Recursive display up to # levels
+  dx -v <expression>           - Verbose display with methods
+
 Module Operations:
   list_modules         - List loaded modules
   module_info <name>   - Show module information

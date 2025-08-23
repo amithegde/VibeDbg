@@ -170,6 +170,87 @@ CORE_TOOL_METADATA = {
         "input_schema": {"type": "object", "properties": {}},
         "examples": [{"description": "Get current session status"}],
     },
+    "dx_visualization": {
+        "description": "Display debugger object model expressions using the NatVis extension model. This command provides rich visualization of C++ objects, data structures, and debugger objects with customizable formatting options.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "C++ expression to be displayed using NatVis visualization",
+                },
+                "options": {
+                    "type": "object",
+                    "properties": {
+                        "grid": {
+                            "type": "boolean",
+                            "description": "Display as data grid (equivalent to -g flag)",
+                            "default": False,
+                        },
+                        "grid_cell_size": {
+                            "type": "integer",
+                            "description": "Restrict grid cell sizes to specified number of characters (equivalent to -gc flag)",
+                        },
+                        "container_skip": {
+                            "type": "integer",
+                            "description": "Skip specified number of container elements (equivalent to -c flag)",
+                        },
+                        "native_only": {
+                            "type": "boolean",
+                            "description": "Use native C/C++ structures only, no NatVis (equivalent to -n flag)",
+                            "default": False,
+                        },
+                        "verbose": {
+                            "type": "boolean",
+                            "description": "Display verbose information including methods (equivalent to -v flag)",
+                            "default": False,
+                        },
+                        "recursion_level": {
+                            "type": "integer",
+                            "description": "Recursively display subtypes up to specified levels (equivalent to -r flag)",
+                            "default": 1,
+                        },
+                        "format_specifier": {
+                            "type": "string",
+                            "description": "Format specifier (x, d, o, b, en, c, s, su, etc.)",
+                        },
+                    },
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in milliseconds (default: 30000)",
+                    "default": 30000,
+                },
+            },
+            "required": ["expression"],
+        },
+        "examples": [
+            {
+                "expression": "Debugger.Settings",
+                "description": "Display debugger settings object",
+            },
+            {
+                "expression": "Debugger.Sessions",
+                "options": {"recursion_level": 3},
+                "description": "Display debugger sessions with 3 levels of recursion",
+            },
+            {
+                "expression": "@$curprocess.Environment",
+                "options": {"recursion_level": 2},
+                "description": "Display current process environment with recursion",
+            },
+            {
+                "expression": "nt!PsIdleProcess",
+                "options": {"native_only": True},
+                "description": "Display idle process using native structures only",
+            },
+            {
+                "expression": "Debugger.Sessions",
+                "options": {"grid": True, "verbose": True},
+                "description": "Display sessions as grid with verbose information",
+            },
+        ],
+    },
 }
 
 # ====================================================================

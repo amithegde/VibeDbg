@@ -36,6 +36,7 @@ def get_core_tools(command_executor: CommandExecutor) -> Dict[str, Any]:
             "step_and_analyze": create_step_and_analyze(command_executor),
             "analyze_context": create_analyze_context(command_executor),
             "get_session_status": create_get_session_status(command_executor),
+            "dx_visualization": create_dx_visualization(command_executor),
         }
     except AttributeError as e:
         logger.error(f"Invalid command executor provided: {e}")
@@ -452,3 +453,81 @@ def create_get_session_status(command_executor: CommandExecutor):
             return f"Error: Unexpected error - {str(e)}"
 
     return get_session_status
+
+
+def create_dx_visualization(command_executor: CommandExecutor):
+    """Create dx_visualization tool function."""
+
+    async def dx_visualization(args: Dict[str, Any]) -> str:
+        """Display debugger object model expressions using the NatVis extension model.
+
+        This tool provides rich visualization of C++ objects, data structures, and
+        debugger objects with customizable formatting options.
+        """
+        try:
+            expression = args.get("expression", "")
+            options = args.get("options", {})
+            timeout = args.get("timeout", 30000)
+
+            if not expression:
+                return "Error: No expression specified"
+
+            # Build the dx command with options
+            dx_command = "dx"
+            
+            # Add grid option
+            if options.get("grid", False):
+                dx_command += " -g"
+                
+            # Add grid cell size
+            grid_cell_size = options.get("grid_cell_size")
+            if grid_cell_size is not None:
+                dx_command += f" -gc {grid_cell_size}"
+                
+            # Add container skip
+            container_skip = options.get("container_skip")
+            if container_skip is not None:
+                dx_command += f" -c {container_skip}"
+                
+            # Add native only flag
+            if options.get("native_only", False):
+                dx_command += " -n"
+                
+            # Add verbose flag
+            if options.get("verbose", False):
+                dx_command += " -v"
+                
+            # Add recursion level
+            recursion_level = options.get("recursion_level", 1)
+            if recursion_level > 1:
+                dx_command += f" -r{recursion_level}"
+                
+            # Add format specifier
+            format_specifier = options.get("format_specifier")
+            if format_specifier:
+                dx_command += f" {expression},{format_specifier}"
+            else:
+                dx_command += f" {expression}"
+
+            # Execute the dx command
+            result = await command_executor.execute_command(dx_command, timeout_ms=timeout)
+
+            if result.success:
+                if result.output and result.output.strip():
+                    return f"dx Visualization ({expression}):\n{result.output.strip()}"
+                else:
+                    return f"dx Visualization ({expression}): Command executed successfully"
+            else:
+                error_msg = f"Error executing dx command for expression '{expression}': {result.error_message}"
+                if result.output and result.output.strip():
+                    error_msg += f"\nOutput: {result.output.strip()}"
+                return error_msg
+
+        except ValueError as e:
+            logger.error(f"Invalid dx visualization parameters: {e}")
+            return f"Error: Invalid dx visualization parameters - {str(e)}"
+        except Exception as e:
+            logger.error(f"Unexpected error in dx_visualization tool: {e}", exc_info=True)
+            return f"Error: Unexpected error - {str(e)}"
+
+    return dx_visualization

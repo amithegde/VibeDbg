@@ -16,6 +16,7 @@ public:
     // Command validation
     static bool is_command_safe(std::string_view command);
     static bool is_empty_result_expected(std::string_view command);
+    static bool is_visualization_command(std::string_view command);
     static std::string normalize_command(std::string_view command);
     
     // Result formatting
@@ -33,6 +34,7 @@ public:
 private:
     static const std::vector<std::string> DANGEROUS_COMMANDS;
     static const std::vector<std::string> EMPTY_OUTPUT_COMMANDS;
+    static const std::vector<std::string> VISUALIZATION_COMMANDS;
 };
 
 } // namespace vibedbg::utils

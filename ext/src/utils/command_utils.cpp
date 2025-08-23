@@ -11,6 +11,10 @@ const std::vector<std::string> CommandUtils::EMPTY_OUTPUT_COMMANDS = {
     "bp", "ba", "bu", "bm", "g", "gh", "gn", "gu", "p", "t", "bc", "bd", "be"
 };
 
+const std::vector<std::string> CommandUtils::VISUALIZATION_COMMANDS = {
+    "dx"
+};
+
 bool CommandUtils::is_command_safe(std::string_view command) {
     if (command.empty() || command.find_first_not_of(" \t\n\r") == std::string::npos) {
         return false;
@@ -32,6 +36,18 @@ bool CommandUtils::is_empty_result_expected(std::string_view command) {
     
     for (const auto& empty_cmd : EMPTY_OUTPUT_COMMANDS) {
         if (lower_cmd.starts_with(empty_cmd + " ") || lower_cmd == empty_cmd) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool CommandUtils::is_visualization_command(std::string_view command) {
+    std::string lower_cmd = to_lower(trim(command));
+    
+    for (const auto& vis_cmd : VISUALIZATION_COMMANDS) {
+        if (lower_cmd.starts_with(vis_cmd + " ") || lower_cmd == vis_cmd) {
             return true;
         }
     }

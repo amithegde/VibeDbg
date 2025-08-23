@@ -74,6 +74,7 @@ COMPLEX_COMMANDS_THAT_NEED_CONTEXT = {
     "lm",
     "x",
     "ln",
+    "dx",
     "!process",
     "!thread",
     "!peb",
