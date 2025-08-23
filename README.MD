@@ -1,5 +1,7 @@
 # VibeDbg 🤖
 
+![VibeDbg Logo](img/logo.png)
+
 A conversational, LLM-powered AI assistant for WinDbg that transforms live debugging into a natural-language, interactive experience.
 
 ## 📋 Overview
@@ -126,6 +128,8 @@ Or try visualization commands:
 ```text
 Use the dx command to show the debugger settings and current process environment
 ```
+
+![Sample Execution](img/sample_execution.png)
 
 ## 📄 License
 
