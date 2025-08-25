@@ -80,6 +80,9 @@ public:
     // Symbol and Module Analysis
     std::string handle_load_symbols(std::string_view module_name);
     std::string handle_show_symbol_info(std::string_view symbol);
+    std::string handle_load_user_symbols();
+    std::string handle_load_all_symbols();
+    std::string handle_get_parent_process();
 
     // Memory Analysis
     std::string handle_search_memory(uintptr_t start_address, uintptr_t end_address, std::string_view pattern);

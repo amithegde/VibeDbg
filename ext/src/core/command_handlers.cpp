@@ -671,6 +671,115 @@ std::string CommandHandlers::handle_show_symbol_info(_In_ std::string_view symbo
     return handle_execute_command(oss.str());
 }
 
+/**
+ * @brief Handles user-mode symbol loading requests.
+ * 
+ * This method loads user-mode symbols which are required for accessing
+ * application structures and debugging user-mode processes.
+ * 
+ * @return Result of user-mode symbol loading operation
+ */
+std::string CommandHandlers::handle_load_user_symbols() {
+    std::string result;
+    
+    // Load user-mode symbols
+    result += "=== Loading User-Mode Symbols ===\n";
+    result += handle_execute_command(".reload /user");
+    result += "\n\n";
+    
+    // Check if symbols loaded successfully
+    result += "=== Verifying Symbol Loading ===\n";
+    result += handle_execute_command("x kernel32!GetLastError");
+    result += "\n\n";
+    
+    // Also try to load other essential user-mode modules
+    result += "=== Loading Additional User-Mode Modules ===\n";
+    result += handle_execute_command(".reload ntdll");
+    result += "\n";
+    result += handle_execute_command(".reload kernel32");
+    result += "\n\n";
+    
+    return result;
+}
+
+/**
+ * @brief Handles parent process information requests.
+ * 
+ * This method retrieves the parent process ID of the currently attached process.
+ * It requires user-mode symbols to be loaded for accessing process structures.
+ * 
+ * @return Formatted parent process information
+ */
+std::string CommandHandlers::handle_get_parent_process() {
+    std::string result;
+    
+    // Check if we're in user mode debugging
+    result += "=== Checking Debugging Mode ===\n";
+    result += handle_execute_command("|");
+    result += "\n\n";
+    
+    // Try to get current process information
+    result += "=== Current Process Information ===\n";
+    result += handle_execute_command("!peb");
+    result += "\n\n";
+    
+    // Try to get parent process using different approaches
+    result += "=== Parent Process Information ===\n";
+    
+    // Method 1: Try using PEB information
+    result += "Method 1 - PEB with parent info:\n";
+    result += handle_execute_command("dt ntdll!_PEB -r1 @$peb");
+    result += "\n\n";
+    
+    // Method 2: Try to access process environment
+    result += "Method 2 - Process environment:\n";
+    result += handle_execute_command("!peb -r1");
+    result += "\n\n";
+    
+    // Method 3: Try using different process commands
+    result += "Method 3 - Alternative process commands:\n";
+    result += handle_execute_command("lm");
+    result += "\n\n";
+    
+    return result;
+}
+
+/**
+ * @brief Handles comprehensive symbol loading for debugging.
+ * 
+ * This method loads all necessary symbols for comprehensive debugging,
+ * including user-mode symbols and common modules.
+ * 
+ * @return Result of comprehensive symbol loading
+ */
+std::string CommandHandlers::handle_load_all_symbols() {
+    std::string result;
+    
+    result += "=== Loading User-Mode Symbols ===\n";
+    result += handle_execute_command(".reload /user");
+    result += "\n\n";
+    
+    result += "=== Loading Common System Modules ===\n";
+    result += handle_execute_command(".reload ntdll");
+    result += "\n";
+    result += handle_execute_command(".reload kernel32");
+    result += "\n";
+    result += handle_execute_command(".reload user32");
+    result += "\n\n";
+    
+    result += "=== Setting Symbol Path ===\n";
+    result += handle_execute_command(".sympath srv*C:\\Symbols*http://msdl.microsoft.com/download/symbols");
+    result += "\n\n";
+    
+    result += "=== Verifying Symbol Loading ===\n";
+    result += handle_execute_command("x kernel32!GetLastError");
+    result += "\n";
+    result += handle_execute_command("x ntdll!NtCreateProcess");
+    result += "\n\n";
+    
+    return result;
+}
+
 // Memory Analysis
 
 /**
@@ -821,6 +930,20 @@ std::string CommandHandlers::try_route_to_specific_handler(
     
     if (cmd == "bl" || cmd == "breakpoints") {
         return handle_list_breakpoints();
+    }
+    
+    // Symbol loading commands
+            if (cmd == "loadusersymbols" || cmd == "load_user_symbols") {
+            return handle_load_user_symbols();
+        }
+    
+    if (cmd == "loadallsymbols" || cmd == "load_all_symbols") {
+        return handle_load_all_symbols();
+    }
+    
+    // Parent process information
+    if (cmd == "getparentprocess" || cmd == "get_parent_process" || cmd == "parentprocess" || cmd == "parent_process") {
+        return handle_get_parent_process();
     }
     
     // Handle breakpoint commands with parameters
@@ -1142,4 +1265,3 @@ std::string CommandHandlers::format_session_json() {
     
     return session_json.dump(2);
 }
-

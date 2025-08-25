@@ -152,10 +152,15 @@ CORE_TOOL_METADATA = {
             "properties": {
                 "type": {
                     "type": "string",
-                    "enum": ["full", "stack", "memory", "process"],
+                    "enum": ["full", "stack", "memory", "process", "parent_process"],
                     "description": "Type of analysis to perform (default: full)",
                     "default": "full",
-                }
+                },
+                "load_symbols": {
+                    "type": "boolean",
+                    "description": "Whether to load symbols during full analysis (default: false)",
+                    "default": False,
+                },
             },
         },
         "examples": [
@@ -163,12 +168,13 @@ CORE_TOOL_METADATA = {
             {"type": "stack", "description": "Stack trace analysis only"},
             {"type": "memory", "description": "Memory and register analysis"},
             {"type": "process", "description": "Process and thread analysis"},
+            {"type": "parent_process", "description": "Parent process analysis"},
+            {
+                "type": "full",
+                "load_symbols": True,
+                "description": "Complete context analysis with symbol loading",
+            },
         ],
-    },
-    "get_session_status": {
-        "description": "Get the current debugging session status. Returns information about the current debugging session including process status, breakpoints, and session health.",
-        "input_schema": {"type": "object", "properties": {}},
-        "examples": [{"description": "Get current session status"}],
     },
     "dx_visualization": {
         "description": "Display debugger object model expressions using the NatVis extension model. This command provides rich visualization of C++ objects, data structures, and debugger objects with customizable formatting options.",
@@ -249,6 +255,30 @@ CORE_TOOL_METADATA = {
                 "options": {"grid": True, "verbose": True},
                 "description": "Display sessions as grid with verbose information",
             },
+        ],
+    },
+    "load_symbols": {
+        "description": "Load symbols for debugging operations. This tool loads user-mode symbols for comprehensive debugging capabilities.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "symbol_type": {
+                    "type": "string",
+                    "enum": ["user", "all"],
+                    "description": "Type of symbols to load - 'user' for user-mode symbols only, 'all' for comprehensive symbols (default: all)",
+                    "default": "all",
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in milliseconds (default: 30000)",
+                    "default": 30000,
+                },
+            },
+        },
+        "examples": [
+            {"symbol_type": "user", "description": "Load user-mode symbols only"},
+            {"symbol_type": "all", "description": "Load all symbols"},
+            {"description": "Load all symbols with default timeout"},
         ],
     },
 }

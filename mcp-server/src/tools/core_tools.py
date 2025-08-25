@@ -35,8 +35,8 @@ def get_core_tools(command_executor: CommandExecutor) -> Dict[str, Any]:
             "set_breakpoint": create_set_breakpoint(command_executor),
             "step_and_analyze": create_step_and_analyze(command_executor),
             "analyze_context": create_analyze_context(command_executor),
-            "get_session_status": create_get_session_status(command_executor),
             "dx_visualization": create_dx_visualization(command_executor),
+            "load_symbols": create_load_symbols(command_executor),
         }
     except AttributeError as e:
         logger.error(f"Invalid command executor provided: {e}")
@@ -342,14 +342,14 @@ def create_analyze_context(command_executor: CommandExecutor):
         """
         try:
             analysis_type = args.get("type", "full")  # full, stack, memory, process
+            load_symbols = args.get("load_symbols", False) # New parameter
 
             analysis_commands = {
                 "full": [
-                    ("|", "Current process and thread"),
-                    ("~", "All threads"),
-                    ("k", "Current stack trace"),
-                    ("r", "Current registers"),
+                    ("|", "Process and thread status"),
+                    ("bl", "Breakpoint list"),
                     ("lm", "Loaded modules"),
+                    ("~", "Thread list"),
                 ],
                 "stack": [
                     ("k", "Stack trace"),
@@ -366,7 +366,14 @@ def create_analyze_context(command_executor: CommandExecutor):
                     ("~", "All threads"),
                     ("!process", "Process information"),
                 ],
+                "parent_process": [
+                    ("getparentprocess", "Parent process information"),
+                ],
             }
+
+            # Add load_symbols command to the full analysis if requested
+            if load_symbols:
+                analysis_commands["full"].append(("loadallsymbols", "Load all symbols"))
 
             commands = analysis_commands.get(analysis_type, analysis_commands["full"])
 
@@ -379,9 +386,13 @@ def create_analyze_context(command_executor: CommandExecutor):
                             f"{description} ({cmd}):\n{result.output.strip()}"
                         )
                     elif not result.success:
-                        results.append(
-                            f"{description} ({cmd}): Error - {result.error_message}"
-                        )
+                        error_msg = f"{description} ({cmd}): Error - {result.error_message}"
+                        
+                        # Add helpful guidance for parent process analysis
+                        if cmd == "getparentprocess" and ("symbols" in result.error_message.lower() or "symbol" in result.error_message.lower()):
+                            error_msg += "\n\n💡 Tip: Try loading user-mode symbols first using the 'load_symbols' tool with symbol_type='user'."
+                        
+                        results.append(error_msg)
                 except ValueError as e:
                     results.append(
                         f"{description} ({cmd}): Invalid parameters - {str(e)}"
@@ -406,53 +417,6 @@ def create_analyze_context(command_executor: CommandExecutor):
             return f"Error: Unexpected error - {str(e)}"
 
     return analyze_context
-
-
-def create_get_session_status(command_executor: CommandExecutor):
-    """Create get_session_status tool function."""
-
-    async def get_session_status(args: Dict[str, Any]) -> str:
-        """Get the current debugging session status.
-
-        Returns information about the current debugging session including
-        process status, breakpoints, and session health.
-        """
-        try:
-            status_commands = [
-                ("|", "Process and thread status"),
-                ("bl", "Breakpoint list"),
-                ("lm", "Loaded modules"),
-                ("~", "Thread list"),
-            ]
-
-            results = []
-            for cmd, description in status_commands:
-                try:
-                    result = await command_executor.execute_command(cmd)
-                    if result.success and result.output:
-                        results.append(f"{description}:\n{result.output.strip()}")
-                    elif not result.success:
-                        results.append(f"{description}: Error - {result.error_message}")
-                except ValueError as e:
-                    results.append(f"{description}: Invalid parameters - {str(e)}")
-                except Exception as e:
-                    logger.error(
-                        f"Unexpected error in session status command '{cmd}': {e}",
-                        exc_info=True,
-                    )
-                    results.append(f"{description}: Unexpected error - {str(e)}")
-
-            return "Session Status:\n\n" + "\n\n".join(results)
-        except ValueError as e:
-            logger.error(f"Invalid session status parameters: {e}")
-            return f"Error: Invalid session status parameters - {str(e)}"
-        except Exception as e:
-            logger.error(
-                f"Unexpected error in get_session_status tool: {e}", exc_info=True
-            )
-            return f"Error: Unexpected error - {str(e)}"
-
-    return get_session_status
 
 
 def create_dx_visualization(command_executor: CommandExecutor):
@@ -531,3 +495,59 @@ def create_dx_visualization(command_executor: CommandExecutor):
             return f"Error: Unexpected error - {str(e)}"
 
     return dx_visualization
+
+
+def create_load_symbols(command_executor: CommandExecutor):
+    """Create load_symbols tool function."""
+
+    async def load_symbols(args: Dict[str, Any]) -> str:
+        """Load symbols for debugging operations.
+
+        This tool loads user-mode symbols for comprehensive debugging capabilities.
+
+        Args:
+            args: Dictionary containing optional parameters:
+                - symbol_type: Type of symbols to load - "user" for user-mode symbols only, 
+                  "all" for comprehensive symbols (default: "all")
+                - timeout: Command timeout in milliseconds (default: 30000)
+
+        Returns:
+            Result of symbol loading operation
+        """
+        try:
+            symbol_type = args.get("symbol_type", "all")  # "user" or "all"
+            timeout = args.get("timeout", 30000)
+
+            # Choose command based on symbol type
+            if symbol_type == "user":
+                command = "loadusersymbols"
+                description = "user-mode symbols"
+            else:
+                command = "loadallsymbols"
+                description = "all symbols"
+
+            # Execute the symbol loading command
+            result = await command_executor.execute_command(command, timeout_ms=timeout)
+
+            if result.success:
+                if result.output and result.output.strip():
+                    return result.output.strip()
+                else:
+                    return f"{description.capitalize()} loaded successfully"
+            else:
+                error_msg = f"Error loading {description}: {result.error_message}"
+                if result.output and result.output.strip():
+                    error_msg += f"\nOutput: {result.output.strip()}"
+                return error_msg
+
+        except ValueError as e:
+            logger.error(f"Invalid load_symbols parameters: {e}")
+            return f"Error: Invalid load_symbols parameters - {str(e)}"
+        except Exception as e:
+            logger.error(f"Unexpected error in load_symbols tool: {e}", exc_info=True)
+            return f"Error: Unexpected error - {str(e)}"
+
+    return load_symbols
+
+
+
