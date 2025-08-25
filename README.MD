@@ -70,6 +70,8 @@ For a complete list of supported commands, see the [Microsoft WinDbg Commands Re
 
 ### 💻 Command
 
+Load Windbgx, load the extension and start named pipe server first and then start the MCP server.
+
 ```cmd
 windbgx -c ".load C:\github\VibeDbg\ext\bin\x64\Release\VibeDbg.dll; !vibedbg_connect" "notepad"
 ```
