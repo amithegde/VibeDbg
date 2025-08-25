@@ -80,7 +80,7 @@ windbgx -c ".load C:\github\VibeDbg\ext\bin\x64\Release\VibeDbg.dll; !vibedbg_co
 windbgx -c ".load C:\github\VibeDbg\ext\bin\x64\Release\VibeDbg.dll; !vibedbg_connect" "C:\dev\cpp\Hello\x64\Release\Hello.exe -p: helloworld"
 ```
 
-### ⚙️ MCP Server configuration
+### ⚙️ MCP Server configuration (VS Code example)
 
 - Create a `.vscode` directory at the root of the workspace
 - Create a file `mcp.json` with following content:
